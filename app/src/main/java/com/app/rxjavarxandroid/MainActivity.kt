@@ -11,13 +11,12 @@ import io.reactivex.schedulers.Schedulers
 
 class MainActivity : AppCompatActivity() {
 
-    private val greetings = "Welcome to RxJava"
+    private lateinit var observer: DisposableObserver<Int>
     private val TAG = "MyActivity"
 
-    private lateinit var myObservable: Observable<String>
-    private lateinit var myObservableJustWithArray: Observable<Array<String>>
+    private lateinit var myObservableJustWithArray: Observable<Int>
 
-    private val list= arrayOf("Item1","Item2,","Item3","Item4")
+    private val list = listOf(1, 2, 3, 4)
 
 
     private var compositeDisposable = CompositeDisposable()
@@ -28,17 +27,8 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
-        myObservable = Observable.just(greetings,"Piyush","Agarwal")
-//        myObservable = Observable.just(greetings)
 
-        myObservableJustWithArray = Observable.just(list)
-
-        compositeDisposable.add(
-            myObservable
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(getObserver())
-        )
+        myObservableJustWithArray = Observable.fromIterable(list)
 
         compositeDisposable.add(
             myObservableJustWithArray
@@ -48,13 +38,14 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun getObserver(): DisposableObserver<String> {
-        return  object : DisposableObserver<String>() {
+
+    private fun getArrayObserver(): DisposableObserver<Int> {
+        observer = object : DisposableObserver<Int>() {
             override fun onComplete() {
                 Log.e(TAG, "onComplete method called")
             }
 
-            override fun onNext(t: String) {
+            override fun onNext(t: Int) {
                 Log.e(TAG, "onNext method called: $t")
 
             }
@@ -65,25 +56,7 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
-    }
-
-    private fun getArrayObserver(): DisposableObserver<Array<String>> {
-        return  object : DisposableObserver<Array<String>>() {
-            override fun onComplete() {
-                Log.e(TAG, "onComplete method called")
-            }
-
-            override fun onNext(t: Array<String>) {
-                Log.e(TAG, "onNext method called: $t")
-
-            }
-
-            override fun onError(e: Throwable) {
-                Log.e(TAG, "onError method called")
-
-            }
-
-        }
+        return observer
     }
 
     override fun onDestroy() {
