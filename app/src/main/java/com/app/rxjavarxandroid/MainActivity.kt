@@ -5,25 +5,29 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    val greetings = "Welcome to RxJava"
-    val TAG = "MyActivity"
+    private val greetings = "Welcome to RxJava"
+    private val TAG = "MyActivity"
 
-    lateinit var observer: DisposableObserver<String>
-    lateinit var observer2: DisposableObserver<String>
-    lateinit var myObservable: Observable<String>
+    private lateinit var observer: DisposableObserver<String>
+    private lateinit var observer2: DisposableObserver<String>
+    private lateinit var myObservable: Observable<String>
 
     private var compositeDisposable = CompositeDisposable()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_main)
+
         myObservable = Observable.just(greetings)
 
         observer = object : DisposableObserver<String>() {
@@ -64,27 +68,26 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-        compositeDisposable.add(observer)
-        compositeDisposable.add(observer2)
+        compositeDisposable.add(
+            myObservable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(observer)
+        )
 
-        myObservable.subscribe(observer)
-        myObservable.subscribe(observer2)
-
+        compositeDisposable.add(
+            myObservable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(observer2)
+        )
     }
 
     override fun onDestroy() {
         super.onDestroy()
-
-//        observer.dispose()
-//        observer2.dispose()
-
-
-// it will dispose compositeDisposable itself we cant add more observers to this after calling below lines
-//        compositeDisposable.dispose()
-
-//        it will clear compositeDisposable we can add more observers to this after calling below lines.
         compositeDisposable.clear()
     }
+
 
 }
 
