@@ -15,6 +15,9 @@ class MainActivity : AppCompatActivity() {
     lateinit var myObservable: Observable<String>
     val TAG = "MyActivity"
 
+    lateinit var disposable: Disposable
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -26,6 +29,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onSubscribe(d: Disposable) {
                 Log.e(TAG, "onSubscribe method called")
+                disposable=d
 
             }
 
@@ -44,6 +48,11 @@ class MainActivity : AppCompatActivity() {
         myObservable.subscribe(observer)
 
 
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        disposable.dispose()
     }
 
 }
