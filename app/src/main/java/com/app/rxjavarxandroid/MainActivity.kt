@@ -2,23 +2,23 @@ package com.app.rxjavarxandroid
 
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
-import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
     private val greetings = "Welcome to RxJava"
     private val TAG = "MyActivity"
 
-    private lateinit var observer: DisposableObserver<String>
-    private lateinit var observer2: DisposableObserver<String>
     private lateinit var myObservable: Observable<String>
+    private lateinit var myObservableJustWithArray: Observable<Array<String>>
+
+    private val list= arrayOf("Item1","Item2,","Item3","Item4")
+
 
     private var compositeDisposable = CompositeDisposable()
 
@@ -28,17 +28,35 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
-        myObservable = Observable.just(greetings)
+        myObservable = Observable.just(greetings,"Piyush","Agarwal")
+//        myObservable = Observable.just(greetings)
 
-        observer = object : DisposableObserver<String>() {
+        myObservableJustWithArray = Observable.just(list)
+
+        compositeDisposable.add(
+            myObservable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(getObserver())
+        )
+
+        compositeDisposable.add(
+            myObservableJustWithArray
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(getArrayObserver())
+        )
+    }
+
+    private fun getObserver(): DisposableObserver<String> {
+        return  object : DisposableObserver<String>() {
             override fun onComplete() {
                 Log.e(TAG, "onComplete method called")
             }
 
             override fun onNext(t: String) {
-                Log.e(TAG, "onNext method called")
+                Log.e(TAG, "onNext method called: $t")
 
-                txtvw.setText(t)
             }
 
             override fun onError(e: Throwable) {
@@ -47,18 +65,17 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
+    }
 
-
-        observer2 = object : DisposableObserver<String>() {
+    private fun getArrayObserver(): DisposableObserver<Array<String>> {
+        return  object : DisposableObserver<Array<String>>() {
             override fun onComplete() {
                 Log.e(TAG, "onComplete method called")
             }
 
-            override fun onNext(t: String) {
-                Log.e(TAG, "onNext method called")
+            override fun onNext(t: Array<String>) {
+                Log.e(TAG, "onNext method called: $t")
 
-                Toast.makeText(applicationContext, "Hello From Observer2", Toast.LENGTH_SHORT)
-                    .show()
             }
 
             override fun onError(e: Throwable) {
@@ -67,20 +84,6 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
-
-        compositeDisposable.add(
-            myObservable
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(observer)
-        )
-
-        compositeDisposable.add(
-            myObservable
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(observer2)
-        )
     }
 
     override fun onDestroy() {
