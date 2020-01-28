@@ -4,33 +4,24 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import io.reactivex.Observable
-import io.reactivex.Observer
-import io.reactivex.disposables.Disposable
+import io.reactivex.observers.DisposableObserver
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var observer: Observer<String>
+    lateinit var observer: DisposableObserver<String>
     val greetings = "Welcome to RxJava"
     lateinit var myObservable: Observable<String>
     val TAG = "MyActivity"
-
-    lateinit var disposable: Disposable
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         myObservable = Observable.just(greetings)
-        observer = object : Observer<String> {
+
+        observer = object : DisposableObserver<String>() {
             override fun onComplete() {
                 Log.e(TAG, "onComplete method called")
-            }
-
-            override fun onSubscribe(d: Disposable) {
-                Log.e(TAG, "onSubscribe method called")
-                disposable=d
-
             }
 
             override fun onNext(t: String) {
@@ -52,7 +43,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        disposable.dispose()
+        observer.dispose()
     }
 
 }
