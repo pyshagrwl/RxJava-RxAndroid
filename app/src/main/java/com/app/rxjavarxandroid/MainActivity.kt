@@ -16,9 +16,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var myObservableJustWithArray: Observable<Int>
 
-    private val list = listOf(1, 2, 3, 4)
-
-
     private var compositeDisposable = CompositeDisposable()
 
 
@@ -28,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
 
-        myObservableJustWithArray = Observable.fromIterable(list)
+        myObservableJustWithArray = Observable.range(20,40)
 
         compositeDisposable.add(
             myObservableJustWithArray
