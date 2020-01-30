@@ -4,6 +4,7 @@ import android.annotation.TargetApi
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
@@ -27,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     private var compositeDisposable = CompositeDisposable()
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -47,9 +49,11 @@ class MainActivity : AppCompatActivity() {
         compositeDisposable.add(
             myObservableJustWithArray.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .map { t ->
-                    t.name=t.name.toUpperCase()
-                    t
+               .flatMap { t ->
+                    t.name = t.name.toUpperCase()
+                    val t1 =
+                        Student("Mr. " + t.name, "student1@gmail.com", 20, Date.from(Instant.now()))
+                    Observable.just(t, t1, t1)
                 }.subscribeWith(getArrayObserver())
         )
     }
