@@ -3,16 +3,24 @@ package com.app.rxjavarxandroid
 import android.annotation.TargetApi
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
+import io.reactivex.ObservableOnSubscribe
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 import java.time.Instant
 import java.util.*
 import kotlin.collections.ArrayList
 
+
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var observer: DisposableObserver<Student>
+    private val TAG = "MyActivity"
 
     private lateinit var myObservableJustWithArray: Observable<Student>
 
@@ -25,16 +33,46 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
 
-        myObservableJustWithArray = Observable.fromIterable(getStudents())
+        myObservableJustWithArray = Observable.create(object : ObservableOnSubscribe<Student> {
+            override fun subscribe(emitter: ObservableEmitter<Student>) {
+                val students = getStudents()
+                for (student in students) {
+                    emitter.onNext(student)
+                }
+                emitter.onComplete()
+            }
 
+        })
 
         compositeDisposable.add(
-            myObservableJustWithArray
-                .subscribeOn(Schedulers.io())
+            myObservableJustWithArray.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .map { t ->t.name.toUpperCase() }
-                .subscribe{ println(it)}
+                .map { t ->
+                    t.name=t.name.toUpperCase()
+                    t
+                }.subscribeWith(getArrayObserver())
         )
+    }
+
+
+    private fun getArrayObserver(): DisposableObserver<Student> {
+        observer = object : DisposableObserver<Student>() {
+            override fun onComplete() {
+                Log.e(TAG, "onComplete method called")
+            }
+
+            override fun onNext(t: Student) {
+                Log.e(TAG, "onNext method called: $t")
+
+            }
+
+            override fun onError(e: Throwable) {
+                Log.e(TAG, "onError method called")
+
+            }
+
+        }
+        return observer
     }
 
     override fun onDestroy() {
