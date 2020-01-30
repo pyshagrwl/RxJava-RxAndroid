@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         compositeDisposable.add(
             myObservableJustWithArray.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-               .flatMap { t ->
+               .concatMap { t ->
                     t.name = t.name.toUpperCase()
                     val t1 =
                         Student("Mr. " + t.name, "student1@gmail.com", 20, Date.from(Instant.now()))
