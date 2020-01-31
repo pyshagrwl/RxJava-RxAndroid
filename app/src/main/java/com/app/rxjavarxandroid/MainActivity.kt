@@ -24,13 +24,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
 
-        myObservableJustWithArray = Observable.range(20, 40)
+        myObservableJustWithArray = Observable.just(40,30,30,40,40,60,45,44,44)
 
         myObservableJustWithArray.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .filter { t ->
-                    t % 3 == 0
-            }
+            .distinct()
             .subscribe(getArrayObserver())
     }
 
