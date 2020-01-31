@@ -24,26 +24,26 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
 
-        myObservableJustWithArray = Observable.range(20,40)
+        myObservableJustWithArray = Observable.range(20, 40)
 
         myObservableJustWithArray.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .buffer(4)
+            .filter { t ->
+                    t % 3 == 0
+            }
             .subscribe(getArrayObserver())
     }
 
 
-    private fun getArrayObserver(): Observer<List<Int>> {
-        return object : Observer<List<Int>> {
+    private fun getArrayObserver(): Observer<Int> {
+        return object : Observer<Int> {
             override fun onComplete() {
                 Log.e(TAG, "onComplete method called")
             }
 
-            override fun onNext(t: List<Int>) {
+            override fun onNext(t: Int) {
                 Log.e(TAG, "onNext method called")
-                for(i in t){
-                    Log.e(TAG,"value of i $i")
-                }
+                    Log.e(TAG, "value of i $t")
 
             }
 
@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onSubscribe(d: Disposable) {
-                disposable =d
+                disposable = d
             }
 
         }
