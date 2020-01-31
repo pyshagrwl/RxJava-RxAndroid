@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
 
         myObservableJustWithArray.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .distinct()
+            .skip(4)
             .subscribe(getArrayObserver())
     }
 
